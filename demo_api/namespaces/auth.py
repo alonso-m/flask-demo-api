@@ -4,7 +4,7 @@ from demo_api.models.users import User
 import validators
 from demo_api import db
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token, create_refresh_token
+from flask_jwt_extended import get_jwt_identity, jwt_required, create_access_token
 
 auth = Namespace("Auth", path="/auth", validate=True)
 
