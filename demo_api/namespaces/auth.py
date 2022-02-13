@@ -41,26 +41,27 @@ class AuthRegister(Resource):
             email = request.json['email']
             username = request.json['username']
             password = request.json['password']
+
+            if not validators.email(email):
+                auth.abort(400, 'Email is invalid')
+
+            if User.query.filter_by(email=email).first() is not None:
+                auth.abort(409, 'Email already exists')
+
+            if User.query.filter_by(username=username).first() is not None:
+                auth.abort(409, 'Username already exists')
+
+            pwd_hash = generate_password_hash(password)
+
+            user = User(username=username, password=pwd_hash, email=email)
+            db.session.add(user)
+            db.session.flush()
+            db.session.commit()
+
+            return {"username": username, "email": email}, 200
+
         except KeyError:
             auth.abort(400, "Email, username and password are required")
-
-        if not validators.email(email):
-            auth.abort(400, 'Email is invalid')
-
-        if User.query.filter_by(email=email).first() is not None:
-            auth.abort(409, 'Email already exists')
-
-        if User.query.filter_by(username=username).first() is not None:
-            auth.abort(409, 'Username already exists')
-
-        pwd_hash = generate_password_hash(password)
-
-        user = User(username=username, password=pwd_hash, email=email)
-        db.session.add(user)
-        db.session.flush()
-        db.session.commit()
-
-        return {"username": username, "email": email}, 200
 
 @auth.route('/login')
 class AuthLogin(Resource):
@@ -71,20 +72,20 @@ class AuthLogin(Resource):
         try:
             password = request.json['password']
             email = request.json['email']
-        except KeyError:
-            auth.abort(400, "Email and password are required")
 
-        user = User.query.filter_by(email=email).first()
-        if user:
-            is_pass_correct = check_password_hash(user.password, password)
+            user = User.query.filter_by(email=email).first()
+            if user:
+                is_pass_correct = check_password_hash(user.password, password)
 
-            if is_pass_correct:
-                access_token = create_access_token(identity=user.id)
-                return {'access_token': access_token, 'username': user.username, 'email': user.email}, 200
+                if is_pass_correct:
+                    access_token = create_access_token(identity=user.id)
+                    return {'access_token': access_token, 'username': user.username, 'email': user.email}, 200
+                else:
+                    auth.abort(400, "Password or user is incorrect")
             else:
                 auth.abort(400, "Password or user is incorrect")
-        else:
-            auth.abort(400, "Password or user is incorrect")
+        except KeyError:
+            auth.abort(400, "Email and password are required")
 
 
 @auth.route('/me')
