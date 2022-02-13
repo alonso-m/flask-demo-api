@@ -32,6 +32,7 @@ auth_login_response = auth.model('AuthResponseModel', {
 
 @auth.route('/register')
 class AuthRegister(Resource):
+    @auth.doc(description='Register a user')
     @auth.expect(auth_register_request)
     @auth.marshal_with(auth_register_response)
     @auth.response(400, 'Validation error')
@@ -65,6 +66,7 @@ class AuthRegister(Resource):
 
 @auth.route('/login')
 class AuthLogin(Resource):
+    @auth.doc(description='Login a user')
     @auth.expect(auth_login_request)
     @auth.marshal_with(auth_login_response)
     @auth.response(400, 'Validation error')
@@ -90,6 +92,7 @@ class AuthLogin(Resource):
 
 @auth.route('/me')
 class AuthMe(Resource):
+    @auth.doc(description='Get logged in users details')
     @auth.marshal_with(auth_register_response)
     @jwt_required()
     def get(self):
