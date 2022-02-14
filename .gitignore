@@ -1,3 +1,5 @@
 demo_api/database.db
 demo_api/__pycache__
+demo_api/namespaces/__pycache__
+demo_api/models/__pycache__
 .vscode
